@@ -7,8 +7,18 @@ import sys
 
 debug = True
 
+if len(sys.argv) < 2 :
+	print "Usage: python <progName> <csvFile> <includeIfCC>"
+	sys.exit(2)
+	
 input_filename = sys.argv[1]
-acct_id = sys.argv[2]
+qbo_template = "qbo_template_CC.qbo"
+acct_id = "9999"
+is_CC = len(sys.argv)==3
+
+if debug and is_CC:
+	print "credit card mode"
+
 
 with open(input_filename) as csvfile:
 	#csvfile.readline() #absorb excess lines before column headers
@@ -57,8 +67,8 @@ with open(input_filename) as csvfile:
 	 	start_date = date_string
 
 		
-		negative =  amount[0]=='-'
-		num_amount = re.sub("[^\d\.\-]","",amount)
+		negative =  amount[0]=='-'	#check if negative value
+		num_amount = re.sub("[^\d\.\-]","",amount) #rm nondigit vals
 		balance_amount+=float(num_amount)
 
 
@@ -66,13 +76,16 @@ with open(input_filename) as csvfile:
 
 	 	fitid = "{}{:04d}{}".format(date_string,count,fitid_amount)
 
-	 	credit_debit = "CREDIT"
-	 	if negative:
-	 		#fitid+='M'
-	 		credit_debit = "DEBIT"
-	 		num_amount = num_amount[1:]
-	 	else:
-	 		num_amount = "-"+num_amount
+	 	credit_debit = "CREDIT" if negative else "DEBIT"
+	 	#fitid+='M'
+	 		
+	 	if is_CC:
+	 		if negative:
+		 		credit_debit = "DEBIT"
+		 		num_amount = num_amount[1:]
+		 	else:
+		 		credit_debit = "CREDIT"
+		 		num_amount = "-"+num_amount
 
 	 	indent = "\t\t\t\t\t"
 
@@ -99,7 +112,7 @@ with open(input_filename) as csvfile:
 	output_filename = re.sub("\.csv",".qbo",input_filename)
 	output_filename = re.sub("\.CSV",".qbo",input_filename)
 	output = open(output_filename, 'w')
-	with open("qbo_template_CC.qbo") as template:
+	with open(qbo_template) as template:
 		for _ in range(33):
 			output.write(template.readline())
 
