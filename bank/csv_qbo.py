@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 import datetime
 import re
 import sys
+debug = True
 
 input_filename = sys.argv[1]
 with open(input_filename) as csvfile:
@@ -14,11 +15,22 @@ with open(input_filename) as csvfile:
 	trans_list = []
 	balance_amount = 0
 	for row in reader:
+
+		#verify essential values are present, otherwise skip
+		date_string = row['Date'][:10]
+		amount = row['Amount']
+		if not date_string or not amount:
+			if debug:
+				print "null values"
+			continue
+
+		amount = amount.replace("$","")
+
 		trans_string = "<STMTTRN>"
 
 		description = row['Description'][:32]
 
-		date_string = row['Date'][:10]
+		
 	 	date_string = (datetime.datetime.strptime(date_string, '%m/%d/%Y')).strftime('%Y%m%d')
 
 	 	if count==0:
@@ -26,7 +38,6 @@ with open(input_filename) as csvfile:
 	 		end_date = date_string
 	 	start_date = date_string
 
-		amount = row['Amount']
 		negative =  amount[0]=='-'
 		num_amount = re.sub("[^\d\.\-]","",amount)
 		fitid_amount = re.sub("[^\d]", "", amount)
