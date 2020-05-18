@@ -30,9 +30,10 @@ with open(input_filename) as csvfile:
 
 		description = row['Description'][:32]
 
-		
-	 	date_string = (datetime.datetime.strptime(date_string, '%m/%d/%Y')).strftime('%Y%m%d')
-
+		try:
+	 		date_string = (datetime.datetime.strptime(date_string, '%m/%d/%Y')).strftime('%Y%m%d')
+	 	except ValueError:
+	 		continue #if the date isn't well formed, skip the line.
 	 	if count==0:
 	 		#trans_string = "<STMTTRNRS>"
 	 		end_date = date_string
